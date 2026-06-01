@@ -1,1 +1,351 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kalender Ucapan SMKN 1 Banjar</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+    body { font-family: 'Plus Jakarta Sans', sans-serif; }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased min-h-screen">
 
+  <nav class="bg-indigo-900 text-white shadow-md sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+        <div class="flex items-center space-x-3">
+          <div class="bg-white p-2 rounded-lg text-indigo-900 font-bold text-lg shadow-sm">🏫</div>
+          <div>
+            <h1 class="font-bold text-base sm:text-lg tracking-wide leading-tight">Kalender Ucapan</h1>
+            <p class="text-xs text-indigo-200">SMK Negeri 1 Banjar</p>
+          </div>
+        </div>
+        <div class="flex bg-indigo-950/50 p-1 rounded-xl border border-indigo-700/30">
+          <button onclick="switchTab('desainer')" id="btn-desainer" class="px-4 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all bg-indigo-600 text-white shadow-sm">
+            <i class="fa-solid fa-palette mr-1.5"></i>Desainer
+          </button>
+          <button onclick="switchTab('admin')" id="btn-admin" class="px-4 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all text-indigo-300 hover:text-white">
+            <i class="fa-solid fa-user-gear mr-1.5"></i>Admin Sosmed
+          </button>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    
+    <div id="loading" class="flex justify-center items-center py-20">
+      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+    </div>
+
+    <section id="tab-desainer" class="space-y-6 hidden">
+      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+        <div>
+          <h2 class="text-xl font-bold text-slate-900">Agenda Hari Besar Nasional</h2>
+          <p class="text-sm text-slate-500">Klik tanggal bertanda untuk melihat brief desainer dan upload karya.</p>
+        </div>
+        
+        <div class="flex items-center space-x-2 bg-slate-50 p-1.5 rounded-xl border border-slate-200">
+          <select id="select-bulan" onchange="updateKalenderDinamis()" class="bg-transparent text-sm font-semibold text-slate-700 focus:outline-none px-2 cursor-pointer">
+            <option value="0">Januari</option><option value="1">Februari</option><option value="2">Maret</option>
+            <option value="3">April</option><option value="4">Mei</option><option value="5" selected>Juni</option>
+            <option value="6">Juli</option><option value="7">Agustus</option><option value="8">September</option>
+            <option value="9">Oktober</option><option value="10">November</option><option value="11">Desember</option>
+          </select>
+          <select id="select-tahun" onchange="updateKalenderDinamis()" class="bg-transparent text-sm font-semibold text-slate-700 focus:outline-none px-2 cursor-pointer border-l border-slate-200">
+            <option value="2025">2025</option>
+            <option value="2026" selected>2026</option>
+            <option value="2027">2027</option>
+            <option value="2028">2028</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-7 gap-2 text-center text-xs font-bold uppercase text-slate-400 tracking-wider px-2">
+        <div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div><div>Sun</div>
+      </div>
+
+      <div id="calendar-grid" class="grid grid-cols-7 gap-4"></div>
+    </section>
+
+    <section id="tab-admin" class="hidden max-w-xl mx-auto">
+      <div class="bg-white p-6 sm:p-8 rounded-2xl border border-slate-200 shadow-sm space-y-6">
+        <div>
+          <h2 class="text-lg font-bold text-slate-900 flex items-center"><i class="fa-solid fa-calendar-plus mr-2 text-indigo-600"></i>Buat Jadwal Hari Penting</h2>
+          <p class="text-xs text-slate-500 mt-1">Agenda yang ditambahkan di sini akan langsung muncul secara otomatis pada kalender kerja tim desainer.</p>
+        </div>
+        
+        <form id="form-admin" onsubmit="simpanAgenda(event)" class="space-y-4">
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">Pilih Tanggal Acara</label>
+            <input type="date" id="admin-tanggal" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20">
+          </div>
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">Nama Hari Penting / Agenda</label>
+            <input type="text" id="admin-hari-penting" required placeholder="Contoh: Hari Kemerdekaan RI" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20">
+          </div>
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">Brief / Instruksi Desain</label>
+            <textarea id="admin-brief" required rows="4" placeholder="Contoh: Gunakan dominasi warna merah putih, sertakan logo SMKN 1 Banjar di pojok kiri atas, wajib estetik!" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20"></textarea>
+          </div>
+          <button type="submit" id="btn-submit-admin" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm py-3 rounded-xl shadow-md transition-colors flex justify-center items-center">
+            <i class="fa-solid fa-floppy-disk mr-2"></i>Simpan & Publikasikan Agenda
+          </button>
+        </form>
+      </div>
+    </section>
+
+  </main>
+
+  <div id="modal-upload" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 hidden z-50">
+    <div class="bg-white rounded-2xl shadow-xl border border-slate-100 w-full max-w-md overflow-hidden transform transition-all">
+      <div class="bg-slate-50 px-6 py-4 border-b border-slate-100 flex justify-between items-center">
+        <div>
+          <span id="modal-date" class="text-xs font-bold text-indigo-600 block uppercase tracking-wider"></span>
+          <h3 id="modal-title" class="text-base font-bold text-slate-900"></h3>
+        </div>
+        <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600 p-1.5 rounded-lg hover:bg-slate-100">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+      <div class="p-6 space-y-5">
+        <div class="bg-indigo-50/50 border border-indigo-100 rounded-xl p-4">
+          <span class="text-xs font-bold text-indigo-900 uppercase tracking-wider block mb-1"><i class="fa-solid fa-circle-info mr-1"></i> Brief Tugas:</span>
+          <p id="modal-desc" class="text-xs text-indigo-950 leading-relaxed"></p>
+        </div>
+        <div class="space-y-3">
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">Nama Desainer (Siswa)</label>
+            <input type="text" id="nama-desainer" placeholder="Masukkan nama kamu" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20">
+          </div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-slate-600">Upload Hasil Karya (JPG, JPEG, PNG)</label>
+          <div class="border-2 border-dashed border-slate-200 hover:border-indigo-400 rounded-2xl p-6 text-center transition-colors cursor-pointer relative bg-slate-50/50">
+            <input type="file" id="input-file-desain" accept=".jpg,.jpeg,.png" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" onchange="updateFileName(this)">
+            <i class="fa-solid fa-cloud-arrow-up text-3xl text-slate-300 mb-2" id="icon-upload"></i>
+            <p class="text-xs font-semibold text-slate-600" id="text-file-name">Seret file ke sini atau <span class="text-indigo-600">Pilih File</span></p>
+          </div>
+          <button onclick="prosesUpload()" id="btn-submit-upload" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm py-3 rounded-xl shadow-md transition-colors flex justify-center items-center">
+            <i class="fa-solid fa-upload mr-2"></i>Kirim Ke Google Drive
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let dbAgenda = [];
+    let agendaTerpilih = null;
+
+    window.onload = function() {
+      muatDataDariSheet();
+    };
+
+    function muatDataDariSheet() {
+      const loadingEl = document.getElementById('loading');
+      if(loadingEl) loadingEl.classList.remove('hidden');
+      
+      if (typeof google !== 'undefined' && google.script && google.script.run) {
+        google.script.run
+          .withSuccessHandler(function(rawRows) {
+            dbAgenda = parseSheetData(rawRows);
+            if(loadingEl) loadingEl.classList.add('hidden');
+            document.getElementById('tab-desainer').classList.remove('hidden');
+            updateKalenderDinamis(); 
+          })
+          .ambilDataAgenda();
+      }
+    }
+
+    // NORMALISASI TANGGAL YANG KUAT
+    function parseSheetData(rows) {
+      if (!rows || rows.length <= 1) return [];
+      let result = [];
+      for (let i = 1; i < rows.length; i++) {
+        let row = rows[i];
+        if (!row || row.length < 2) continue;
+        let tglRaw = row[1];
+        let tglStr = "";
+        
+        if (tglRaw) {
+          let d = new Date(tglRaw);
+          if (!isNaN(d.getTime())) {
+            let month = '' + (d.getMonth() + 1);
+            let day = '' + d.getDate();
+            let year = d.getFullYear();
+            if (month.length < 2) month = '0' + month;
+            if (day.length < 2) day = '0' + day;
+            tglStr = [year, month, day].join('-');
+          } else {
+            // Pembersihan jika teks biasa dari Gsheet berformat aneh
+            tglStr = tglRaw.toString().trim().split('T')[0].replace(/\//g, '-');
+          }
+        }
+        result.push({ id: row[0] || "", tanggal: tglStr, hariPenting: row[2] || "", brief: row[3] || "", status: row[4] || "", linkDrive: row[5] || "" });
+      }
+      return result;
+    }
+
+    function updateKalenderDinamis() {
+      const bulanterpilih = parseInt(document.getElementById('select-bulan').value);
+      const tahunterpilih = parseInt(document.getElementById('select-tahun').value);
+      generateCalendar(tahunterpilih, bulanterpilih);
+    }
+
+    // PENCOCOKAN FORMAT KALENDER BERDASARKAN GAMBAR 1 (SENIN - MINGGU)
+    function generateCalendar(year, month) {
+      const grid = document.getElementById('calendar-grid');
+      if(!grid) return;
+      let htmlElements = "";
+      
+      let firstDay = new Date(year, month, 1).getDay(); 
+      // Ubah indeks agar Senin jadi hari pertama (0=Senin, 1=Selasa ... 6=Minggu)
+      let firstDayIndex = firstDay === 0 ? 6 : firstDay - 1; 
+      
+      const totalDays = new Date(year, month + 1, 0).getDate();
+      
+      // Kotak kosong pembantu
+      for (let x = 0; x < firstDayIndex; x++) {
+        htmlElements += `<div class="bg-slate-100/30 min-h-[130px] rounded-2xl border border-dashed border-slate-200/50 opacity-40"></div>`;
+      }
+      
+      // Render Tanggal Utama
+      for (let day = 1; day <= totalDays; day++) {
+        let dayStr = day < 10 ? '0' + day : day;
+        let mStr = (month + 1) < 10 ? '0' + (month + 1) : (month + 1);
+        let tanggalCek = `${year}-${mStr}-${dayStr}`;
+        
+        let agenda = dbAgenda.find(a => a.tanggal === tanggalCek);
+        
+        if (agenda) {
+          let warnaStatus = agenda.status === 'Perlu Review' ? 'bg-blue-50 text-blue-700 border-blue-200' : 'bg-amber-50 text-amber-700 border-amber-200';
+          let indicatorTop = agenda.status === 'Perlu Review' ? 'bg-blue-500' : 'bg-amber-500';
+          let labelStatus = agenda.status === 'Perlu Review' ? '🟡 Perlu Review' : '🔴 Belum Dibuat';
+
+          htmlElements += `
+            <button onclick="openModal('${agenda.tanggal}', '${escapeHtml(agenda.hariPenting)}', '${escapeHtml(agenda.brief)}')" 
+                    class="bg-indigo-950 text-white min-h-[130px] rounded-2xl border-2 border-indigo-900 p-4 text-left transition-all duration-200 shadow-md hover:shadow-lg flex flex-col justify-between group relative overflow-hidden">
+              <div class="absolute top-0 left-0 w-full h-1 ${indicatorTop}"></div>
+              <div>
+                <span class="text-lg font-bold text-slate-300 group-hover:text-white transition-colors">${dayStr}</span>
+                <p class="text-xs font-bold text-white line-clamp-2 mt-1">${agenda.hariPenting}</p>
+              </div>
+              <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-medium ${warnaStatus} border w-max">
+                ${labelStatus}
+              </span>
+            </button>
+          `;
+        } else {
+          htmlElements += `
+            <div class="bg-white min-h-[130px] rounded-2xl border border-slate-200 p-4 text-left shadow-sm flex flex-col justify-between opacity-80">
+              <span class="text-lg font-bold text-slate-400">${dayStr}</span>
+              <span class="text-xs text-slate-400 italic"></span>
+            </div>
+          `;
+        }
+      }
+      grid.innerHTML = htmlElements;
+    }
+
+    function escapeHtml(text) {
+      if(!text) return "";
+      return text.toString().replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+    }
+
+    function openModal(tanggal, judul, brief) {
+      agendaTerpilih = dbAgenda.find(a => a.tanggal === tanggal);
+      if(!agendaTerpilih) return;
+      document.getElementById('modal-date').innerText = tanggal;
+      document.getElementById('modal-title').innerText = judul;
+      document.getElementById('modal-desc').innerText = brief;
+      document.getElementById('modal-upload').classList.remove('hidden');
+    }
+
+    function closeModal() { 
+      document.getElementById('modal-upload').classList.add('hidden'); 
+    }
+
+    function updateFileName(input) {
+      if (input.files.length > 0) {
+        document.getElementById('text-file-name').innerText = input.files[0].name;
+        document.getElementById('icon-upload').className = "fa-solid fa-file-image text-3xl text-indigo-500 mb-2";
+      }
+    }
+
+    function prosesUpload() {
+      const fileInput = document.getElementById('input-file-desain');
+      const namaDesainer = document.getElementById('nama-desainer').value;
+      const btn = document.getElementById('btn-submit-upload');
+
+      if (!namaDesainer) { alert("Isi nama kamu dulu, bro!"); return; }
+      if (fileInput.files.length === 0) { alert("Pilih file gambar desainnya dulu!"); return; }
+
+      const file = fileInput.files[0];
+      const reader = new FileReader();
+      btn.disabled = true;
+      btn.innerHTML = `<i class="fa-solid fa-circle-notch animate-spin mr-2"></i>Mengirim ke Drive...`;
+
+      reader.onload = function(e) {
+        const base64Data = e.target.result.split(',')[1];
+        const dataForm = { bytes: base64Data, mimeType: file.type, tanggal: agendaTerpilih.tanggal, hariPenting: agendaTerpilih.hariPenting, namaDesainer: namaDesainer };
+
+        google.script.run.withSuccessHandler(function(response) {
+          if (response.success) {
+            alert("🎉 " + response.message);
+            agendaTerpilih.status = "Perlu Review";
+            updateKalenderDinamis();
+            closeModal();
+          } else { alert("❌ Gagal: " + response.message); }
+          btn.disabled = false;
+          btn.innerHTML = `<i class="fa-solid fa-upload mr-2"></i>Kirim Ke Google Drive`;
+        }).uploadDesain(dataForm);
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function simpanAgenda(e) {
+      e.preventDefault();
+      const btn = document.getElementById('btn-submit-admin');
+      
+      const dataForm = {
+        tanggal: document.getElementById('admin-tanggal').value,
+        hariPenting: document.getElementById('admin-hari-penting').value,
+        brief: document.getElementById('admin-brief').value
+      };
+
+      btn.disabled = true;
+      btn.innerHTML = `<i class="fa-solid fa-circle-notch animate-spin mr-2"></i>Menyimpan ke Sheet...`;
+
+      google.script.run.withSuccessHandler(function(response) {
+        alert(response.message);
+        document.getElementById('form-admin').reset(); 
+        btn.disabled = false;
+        btn.innerHTML = `<i class="fa-solid fa-floppy-disk mr-2"></i>Simpan & Publikasikan Agenda`;
+        muatDataDariSheet();
+        switchTab('desainer');
+      }).simpanAgendaAdmin(dataForm);
+    }
+
+    function switchTab(role) {
+      const btnDesainer = document.getElementById('btn-desainer');
+      const btnAdmin = document.getElementById('btn-admin');
+      const tabDesainer = document.getElementById('tab-desainer');
+      const tabAdmin = document.getElementById('tab-admin');
+
+      if(role === 'admin') {
+        tabDesainer.classList.add('hidden');
+        tabAdmin.classList.remove('hidden');
+        btnAdmin.className = "px-4 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all bg-indigo-600 text-white shadow-sm";
+        btnDesainer.className = "px-4 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all text-indigo-300 hover:text-white";
+      } else {
+        tabAdmin.classList.add('hidden');
+        tabDesainer.classList.remove('hidden');
+        btnDesainer.className = "px-4 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all bg-indigo-600 text-white shadow-sm";
+        btnAdmin.className = "px-4 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all text-indigo-300 hover:text-white";
+      }
+    }
+  </script>
+</body>
+</html>
